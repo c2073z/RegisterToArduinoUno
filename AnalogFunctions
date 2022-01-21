@@ -1,0 +1,77 @@
+float AnalogReadR(int channel)
+{
+  ADCSRA |= (1<<ADEN);                   // enables ADC
+  ADCSRA |= (1<<ADPS1) | (1<<ADPS0);     // division factor = 8, ADC clock = (16/8)=2MHz
+  //ADMUX &= ~((1<<REFS0) | (1<<REFS1)); // voltage reference = AREF
+  ADMUX = 0b01000000;                    // voltage reference = 5.0V   (ADMUX &= ~(1<<REFS1) + ADMUX |= (1<<REFS0))
+  //ADMUX = 0b11000000;                  // voltage reference = 1.1V   (ADMUX |= (1<<REFS1) | (1<<REFS0))
+  if(channel == 0)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3); 
+  }
+  else if(channel == 1)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 2)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 3)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 4)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 5)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2);
+    ADMUX &= ~(1<<MUX3);
+  }
+  ADCSRA |= (1<<ADSC); // start ADC conversion
+  while(ADCSRA & (1<<ADSC));
+  return ((ADC*5)/1023.0);
+}
+
+void AnalogWriteR1(float duty, float period)
+{
+  float periodt = (period/(1024.00f*0.0000000625f));
+  float dutycycle = (period/(1024.00f*0.0000000625f))*(duty/100.00f) + 1.0f;
+  TCCR1A = 0x00;
+  TCCR1B |= (1<<CS22) | (1<<CS20);
+  OCR1A = periodt;
+  OCR1B = dutycycle;
+  TIMSK1 |= (1<<OCIE1A) | (1<<OCIE1B);
+  sei();
+}
+
+void AnalogWriteR2(float duty, float period)
+{
+  int periodt = (period/(1024*0.0000000625));
+  int dutycycle = (period/(1024*0.0000000625))*(duty/100) + 1;
+  TCCR2A = 0x00;
+  TCCR2B |= (1<<CS22) | (1<<CS21) | (1<<CS20);
+  OCR2A = periodt;
+  OCR2B = dutycycle;
+  TIMSK2 |= (1<<OCIE2A) | (1<<OCIE2B);
+  sei();
+}
