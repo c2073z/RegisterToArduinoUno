@@ -1,0 +1,550 @@
+/*This functions make register level coding more human readable 
+and higher level. It simulates C++ Arduino programming language*/
+#include <util/delay.h>
+ISR(INT0_vect)
+{
+  digitalSay(9,1);
+}
+
+int main(void)
+{
+  //This simple program will blink an LED connected to pin 6, 
+  //as you can see I just need to write 6, and 1 to make it an output pin! 
+  //Interrupt ext will make green LED light up
+  //ADC also works like magic!
+  //Wow much time saved!
+  Serial.begin(9600);
+  float ADC;
+  pinType(6,1);//Red LED
+  pinType(9,1);//Green LED
+  extInterrupt(0,0);
+
+  while(1)
+  {
+    digitalSay(6,1);
+    wait_ms(500);
+    digitalSay(6,0);
+    wait_ms(500);
+    ADC = AnalogReadR(0); //read analog A0
+    Serial.println(ADC);
+  }
+}
+/* Translation begins here */
+//aka pinMode(1, HIGH)
+void pinType(int pin, int state)
+{
+  if (state == 1)//means output
+  {
+    if (pin == 0)
+    {
+      DDRD |= (1<<DDD0);
+    }
+    else if (pin == 1)
+    {
+      DDRD |= (1<<DDD1);
+    }
+    else if (pin == 2)
+    {
+      DDRD |= (1<<DDD2);
+    }
+    else if (pin == 3)
+    {
+      DDRD |= (1<<DDD3);
+    }
+    else if (pin == 4)
+    {
+      DDRD |= (1<<DDD4);
+    }
+    else if (pin == 5)
+    {
+      DDRD |= (1<<DDD5);
+    }
+    else if (pin == 6)
+    {
+      DDRD |= (1<<DDD6);
+    }
+    else if (pin == 7)
+    {
+      DDRD |= (1<<DDD7);
+    }
+    else if (pin == 8)
+    {
+      DDRB |= (1<<DDB0);
+    }
+    else if (pin == 9)
+    {
+      DDRB |= (1<<DDB1);
+    }
+    else if (pin == 10)
+    {
+      DDRB |= (1<<DDB2);
+    }
+    else if (pin == 11)
+    {
+      DDRB |= (1<<DDB3);
+    }
+    else if (pin == 12)
+    {
+      DDRB |= (1<<DDB4);
+    }
+    else if (pin == 13)
+    {
+      DDRB |= (1<<DDB5);
+    }
+  }
+  else if (state == 0)//means input
+  {
+    if (pin == 0)
+    {
+      DDRD &=~(1<<DDD0);
+    }
+    else if (pin == 1)
+    {
+      DDRD &=~(1<<DDD1);
+    }
+    else if (pin == 2)
+    {
+      DDRD &=~(1<<DDD2);
+    }
+    else if (pin == 3)
+    {
+      DDRD &=~(1<<DDD3);
+    }
+    else if (pin == 4)
+    {
+      DDRD &=~(1<<DDD4);
+    }
+    else if (pin == 5)
+    {
+      DDRD &=~(1<<DDD5);
+    }
+    else if (pin == 6)
+    {
+      DDRD &=~(1<<DDD6);
+    }
+    else if (pin == 7)
+    {
+      DDRD &=~(1<<DDD7);
+    }
+    else if (pin == 8)
+    {
+      DDRB &=~(1<<DDB0);
+    }
+    else if (pin == 9)
+    {
+      DDRB &=~(1<<DDB1);
+    }
+    else if (pin == 10)
+    {
+      DDRB &=~(1<<DDB2);
+    }
+    else if (pin == 11)
+    {
+      DDRB &=~(1<<DDB3);
+    }
+    else if (pin == 12)
+    {
+      DDRB &=~(1<<DDB4);
+    }
+    else if (pin == 13)
+    {
+      DDRB &=~(1<<DDB5);
+    }
+  } 
+}
+
+//aka digitalWrite(3, HIGH)
+void digitalSay(int pin, int state)
+{
+  if (state == 1)//means HIGH
+  {
+    if (pin == 0)
+    {
+      PORTD |= (1<<PD0);
+    }
+    else if (pin == 1)
+    {
+      PORTD |= (1<<PD1);
+    }
+    else if (pin == 2)
+    {
+      PORTD |= (1<<PD2);
+    }
+    else if (pin == 3)
+    {
+      PORTD |= (1<<PD3);
+    }
+    else if (pin == 4)
+    {
+      PORTD |= (1<<PD4);
+    }
+    else if (pin == 5)
+    {
+      PORTD |= (1<<PD5);
+    }
+    else if (pin == 6)
+    {
+      PORTD |= (1<<PD6);
+    }
+    else if (pin == 7)
+    {
+      PORTD |= (1<<PD7);
+    }
+    else if (pin == 8)
+    {
+      PORTB |= (1<<PB0);
+    }
+    else if (pin == 9)
+    {
+      PORTB |= (1<<PB1);
+    }
+    else if (pin == 10)
+    {
+      PORTB |= (1<<PB2);
+    }
+    else if (pin == 11)
+    {
+      PORTB |= (1<<PB3);
+    }
+    else if (pin == 12)
+    {
+      PORTB |= (1<<PB4);
+    }
+    else if (pin == 13)
+    {
+      PORTB |= (1<<PB5);
+    }
+  }
+  else if (state == 0)//means LOW
+  {
+    if (pin == 0)
+    {
+      PORTD &=~(1<<PD0);
+    }
+    else if (pin == 1)
+    {
+      PORTD &=~(1<<PD1);
+    }
+    else if (pin == 2)
+    {
+      PORTD &=~(1<<PD2);
+    }
+    else if (pin == 3)
+    {
+      PORTD &=~(1<<PD3);
+    }
+    else if (pin == 4)
+    {
+      PORTD &=~(1<<PD4);
+    }
+    else if (pin == 5)
+    {
+      PORTD &=~(1<<PD5);
+    }
+    else if (pin == 6)
+    {
+      PORTD &=~(1<<PD6);
+    }
+    else if (pin == 7)
+    {
+      PORTD &=~(1<<PD7);
+    }
+    else if (pin == 8)
+    {
+      PORTB &=~(1<<PB0);
+    }
+    else if (pin == 9)
+    {
+      PORTB &=~(1<<PB1);
+    }
+    else if (pin == 10)
+    {
+      PORTB &=~(1<<PB2);
+    }
+    else if (pin == 11)
+    {
+      PORTB &=~(1<<PB3);
+    }
+    else if (pin == 12)
+    {
+      PORTB &=~(1<<PB4);
+    }
+    else if (pin == 13)
+    {
+      PORTB &=~(1<<PB5);
+    }
+  }
+}
+
+float AnalogReadR(int channel)
+{
+  ADCSRA |= (1<<ADEN);                   // enables ADC
+  ADCSRA |= (1<<ADPS1) | (1<<ADPS0);     // division factor = 8, ADC clock = (16/8)=2MHz
+  //ADMUX &= ~((1<<REFS0) | (1<<REFS1)); // voltage reference = AREF
+  ADMUX = 0b01000000;                    // voltage reference = 5.0V   (ADMUX &= ~(1<<REFS1) + ADMUX |= (1<<REFS0))
+  //ADMUX = 0b11000000;                  // voltage reference = 1.1V   (ADMUX |= (1<<REFS1) | (1<<REFS0))
+  if(channel == 0)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3); 
+  }
+  else if(channel == 1)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 2)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 3)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 4)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 5)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2);
+    ADMUX &= ~(1<<MUX3);
+  }
+  ADCSRA |= (1<<ADSC); // start ADC conversion
+  while(ADCSRA & (1<<ADSC));
+  return ((ADC*5)/1023.0);
+}
+
+void pcInterrupt(int pin)
+{
+  static int pcint;
+  if(pin == 0)
+  {
+    pcint = 16;
+  }
+  else if(pin == 1)
+  {
+    pcint = 17;
+  }
+  else if(pin == 2)
+  {
+    pcint = 18;
+  }
+  else if(pin == 3)
+  {
+    pcint = 19;
+  }
+  else if(pin == 4)
+  {
+    pcint = 20;
+  }
+  else if(pin == 5)
+  {
+    pcint = 21;
+  }
+  else if(pin == 6)
+  {
+    pcint = 22;
+  }
+  else if(pin == 7)
+  {
+    pcint = 23;
+  }
+  else if(pin == 8)
+  {
+    pcint = 0;
+  }
+  else if(pin == 9)
+  {
+    pcint = 1;
+  }
+  else if(pin == 10)
+  {
+    pcint = 2;
+  }
+  else if(pin == 11)
+  {
+    pcint = 3;
+  }
+  else if(pin == 12)
+  {
+    pcint = 4;
+  }
+  else if(pin == 13)
+  {
+    pcint = 5;
+  }
+  if(pcint >= 0 && pcint <= 7)
+  {
+    if(pcint == 0)
+    {
+      PCMSK0 |= (1<<PCINT0);
+    }
+    else if(pcint == 1)
+    {
+      PCMSK0 |= (1<<PCINT1);
+    }
+    else if(pcint == 2)
+    {
+      PCMSK0 |= (1<<PCINT2);
+    }
+    else if(pcint == 3)
+    {
+      PCMSK0 |= (1<<PCINT3);
+    }
+    else if(pcint == 4)
+    {
+      PCMSK0 |= (1<<PCINT4);
+    }
+    else if(pcint == 5)
+    {
+      PCMSK0 |= (1<<PCINT5);
+    }
+    else if(pcint == 6)
+    {
+      PCMSK0 |= (1<<PCINT6);
+    }
+    else if(pcint == 7)
+    {
+      PCMSK0 |= (1<<PCINT7);
+    }
+    PCICR |= (1<<PCIE0);
+  }
+  else if(pcint >= 8 && pcint <= 14)
+  {
+    if(pcint == 8)
+    {
+      PCMSK1 |= (1<<PCINT8);
+    }
+    else if(pcint == 9)
+    {
+      PCMSK1 |= (1<<PCINT9);
+    }
+    else if(pcint == 10)
+    {
+      PCMSK1 |= (1<<PCINT10);
+    }
+    else if(pcint == 11)
+    {
+      PCMSK1 |= (1<<PCINT11);
+    }
+    else if(pcint == 12)
+    {
+      PCMSK1 |= (1<<PCINT12);
+    }
+    else if(pcint == 13)
+    {
+      PCMSK1 |= (1<<PCINT13);
+    }
+    else if(pcint == 14)
+    {
+      PCMSK1 |= (1<<PCINT14);
+    }
+    PCICR |= (1<<PCIE1);
+  }
+  else if(pcint >= 16 && pcint <= 23)
+  {
+    if(pcint == 16)
+    {
+      PCMSK2 |= (1<<PCINT16);
+    }
+    else if(pcint == 17)
+    {
+      PCMSK2 |= (1<<PCINT17);
+    }
+    else if(pcint == 18)
+    {
+      PCMSK2 |= (1<<PCINT18);
+    }
+    else if(pcint == 19)
+    {
+      PCMSK2 |= (1<<PCINT19);
+    }
+    else if(pcint == 20)
+    {
+      PCMSK2 |= (1<<PCINT20);
+    }
+    else if(pcint == 21)
+    {
+      PCMSK2 |= (1<<PCINT21);
+    }
+    else if(pcint == 22)
+    {
+      PCMSK2 |= (1<<PCINT22);
+    }
+    else if(pcint == 23)
+    {
+      PCMSK2 |= (1<<PCINT23);
+    }
+    PCICR |= (1<<PCIE2);
+  }
+  sei();
+}
+
+void extInterrupt(int ext, int control)//ext is to choose INT1 or INT0. 1 = INT1, 0 = INT0. If you want pin change, control = 0, falling edge, control = 1, rising edge, control = 2
+{
+  if (ext == 1)
+  {
+    pinType(3,0);
+    EIMSK |= (1<<INT1);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC11);
+      EICRA |= (1<<ISC10);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+  }
+  else if (ext == 0)
+  {
+    pinType(2,0);
+    EIMSK |= (1<<INT0);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC01);
+      EICRA |= (1<<ISC00);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+  }
+ sei();
+}
+
+void wait_ms(unsigned int ms)
+{
+  for(unsigned int i=0; i < ms; i++)
+  {
+    _delay_ms(1);
+  }
+}
