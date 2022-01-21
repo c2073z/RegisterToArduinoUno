@@ -1,0 +1,210 @@
+void extInterrupt(int ext, int control)//ext is to choose INT1 or INT0. 1 = INT1, 0 = INT0. If you want pin change, control = 0, falling edge, control = 1, rising edge, control = 2
+{
+  if (ext == 1)
+  {
+    pinType(3,0);
+    EIMSK |= (1<<INT1);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC11);
+      EICRA |= (1<<ISC10);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+  }
+  else if (ext == 0)
+  {
+    pinType(2,0);
+    EIMSK |= (1<<INT0);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC01);
+      EICRA |= (1<<ISC00);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+  }
+ sei();
+}
+
+void pcInterrupt(int pin)
+{
+  static int pcint;
+  if(pin == 0)
+  {
+    pcint = 16;
+  }
+  else if(pin == 1)
+  {
+    pcint = 17;
+  }
+  else if(pin == 2)
+  {
+    pcint = 18;
+  }
+  else if(pin == 3)
+  {
+    pcint = 19;
+  }
+  else if(pin == 4)
+  {
+    pcint = 20;
+  }
+  else if(pin == 5)
+  {
+    pcint = 21;
+  }
+  else if(pin == 6)
+  {
+    pcint = 22;
+  }
+  else if(pin == 7)
+  {
+    pcint = 23;
+  }
+  else if(pin == 8)
+  {
+    pcint = 0;
+  }
+  else if(pin == 9)
+  {
+    pcint = 1;
+  }
+  else if(pin == 10)
+  {
+    pcint = 2;
+  }
+  else if(pin == 11)
+  {
+    pcint = 3;
+  }
+  else if(pin == 12)
+  {
+    pcint = 4;
+  }
+  else if(pin == 13)
+  {
+    pcint = 5;
+  }
+  if(pcint >= 0 && pcint <= 7)
+  {
+    if(pcint == 0)
+    {
+      PCMSK0 |= (1<<PCINT0);
+    }
+    else if(pcint == 1)
+    {
+      PCMSK0 |= (1<<PCINT1);
+    }
+    else if(pcint == 2)
+    {
+      PCMSK0 |= (1<<PCINT2);
+    }
+    else if(pcint == 3)
+    {
+      PCMSK0 |= (1<<PCINT3);
+    }
+    else if(pcint == 4)
+    {
+      PCMSK0 |= (1<<PCINT4);
+    }
+    else if(pcint == 5)
+    {
+      PCMSK0 |= (1<<PCINT5);
+    }
+    else if(pcint == 6)
+    {
+      PCMSK0 |= (1<<PCINT6);
+    }
+    else if(pcint == 7)
+    {
+      PCMSK0 |= (1<<PCINT7);
+    }
+    PCICR |= (1<<PCIE0);
+  }
+  else if(pcint >= 8 && pcint <= 14)
+  {
+    if(pcint == 8)
+    {
+      PCMSK1 |= (1<<PCINT8);
+    }
+    else if(pcint == 9)
+    {
+      PCMSK1 |= (1<<PCINT9);
+    }
+    else if(pcint == 10)
+    {
+      PCMSK1 |= (1<<PCINT10);
+    }
+    else if(pcint == 11)
+    {
+      PCMSK1 |= (1<<PCINT11);
+    }
+    else if(pcint == 12)
+    {
+      PCMSK1 |= (1<<PCINT12);
+    }
+    else if(pcint == 13)
+    {
+      PCMSK1 |= (1<<PCINT13);
+    }
+    else if(pcint == 14)
+    {
+      PCMSK1 |= (1<<PCINT14);
+    }
+    PCICR |= (1<<PCIE1);
+  }
+  else if(pcint >= 16 && pcint <= 23)
+  {
+    if(pcint == 16)
+    {
+      PCMSK2 |= (1<<PCINT16);
+    }
+    else if(pcint == 17)
+    {
+      PCMSK2 |= (1<<PCINT17);
+    }
+    else if(pcint == 18)
+    {
+      PCMSK2 |= (1<<PCINT18);
+    }
+    else if(pcint == 19)
+    {
+      PCMSK2 |= (1<<PCINT19);
+    }
+    else if(pcint == 20)
+    {
+      PCMSK2 |= (1<<PCINT20);
+    }
+    else if(pcint == 21)
+    {
+      PCMSK2 |= (1<<PCINT21);
+    }
+    else if(pcint == 22)
+    {
+      PCMSK2 |= (1<<PCINT22);
+    }
+    else if(pcint == 23)
+    {
+      PCMSK2 |= (1<<PCINT23);
+    }
+    PCICR |= (1<<PCIE2);
+  }
+  sei();
+}
