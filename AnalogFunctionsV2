@@ -1,0 +1,177 @@
+float AnalogReadR(int channel)
+{
+  ADCSRA |= (1<<ADEN);                   // enables ADC
+  
+  //ADCSRA |= (1<<ADPS0);                // division factor = 2, ADC clock = (16/2)=8MHz
+  //ADCSRA |= (1<<ADPS1);                // division factor = 4, ADC clock = (16/4)=4MHz
+  ADCSRA |= (1<<ADPS1) | (1<<ADPS0);     // division factor = 8, ADC clock = (16/8)=2MHz
+  //ADCSRA |= (1<<ADPS2);                // division factor = 16, ADC clock = (16/16)=1MHz
+  //ADCSRA |= (1<<ADPS0) | (1<<ADPS2);   // division factor = 32, ADC clock = (16/32)=0.5MHz
+  //ADCSRA |= (1<<ADPS1) | (1<<ADPS2);   // division factor = 64, ADC clock = (16/64)=0.25MHz
+  //ADCSRA |= (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2);   // division factor = 128, ADC clock = (16/128)=0.125MHz
+  
+  //ADMUX &= ~((1<<REFS0) | (1<<REFS1)); // voltage reference = AREF
+  ADMUX = 0b01000000;                    // voltage reference = 5.0V   (ADMUX &= ~(1<<REFS1) + ADMUX |= (1<<REFS0))
+  //ADMUX = 0b11000000;                  // voltage reference = 1.1V   (ADMUX |= (1<<REFS1) | (1<<REFS0))
+  
+  ADMUX &= ~(1<<ADLAR);                  // set data alignment to right justification
+  //ADMUX |= (1<<ADLAR);                 // set data alignment to left justification
+  
+  if(channel == 0)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3); 
+  }
+  else if(channel == 1)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 2)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 3)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 4)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 5)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2);
+    ADMUX &= ~(1<<MUX3);
+  }
+  ADCSRA |= (1<<ADSC); // start ADC conversion
+  while(ADCSRA & (1<<ADSC));
+  
+  float adc_value = ADCL | (ADCH << 8);          // right justification
+  //float adc_value = (ADCL >> 6) | (ADCH << 2); // left justification
+  
+  return (adc_value*5.0f/1023.0f);
+}
+
+void AnalogWriteR0(float duty, int prescalar, float period)
+{
+  float periodt = (period/(prescalar*0.0000000625f));
+  float dutycycle = (period/(prescalar*0.0000000625f))*(duty/100.00f) + 1.0f;
+  TCCR0A = 0x00;
+  if(prescalar == 1)
+  {
+    TCCR0B |= (1<<CS00);
+    TCCR0B &= ~((1<<CS01) | (1<<CS02));
+  }
+  else if(prescalar == 8)
+  {
+    TCCR0B |= (1<<CS01);
+    TCCR0B &= ~((1<<CS00) | (1<<CS02));
+  }
+  else if(prescalar == 64)
+  {
+    TCCR0B |= (1<<CS00) | (1<<CS01);
+    TCCR0B &= ~(1<<CS02);
+  }
+  else if(prescalar == 256)
+  {
+    TCCR0B |= (1<<CS02);
+    TCCR0B &= ~((1<<CS01) | (1<<CS00));
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR0B |= (1<<CS02) | (1<<CS00); 
+    TCCR0B &= ~(1<<CS01);
+  }
+  OCR0A = periodt;
+  OCR0B = dutycycle;
+  TIMSK0 |= (1<<OCIE0A) | (1<<OCIE0B);
+  sei();
+}
+
+void AnalogWriteR1(float duty, int prescalar, float period)
+{
+  float periodt = (period/(prescalar*0.0000000625f));
+  float dutycycle = (period/(prescalar*0.0000000625f))*(duty/100.00f) + 1.0f;
+  TCCR1A = 0x00;
+  if(prescalar == 1)
+  {
+    TCCR1B |= (1<<CS10);
+    TCCR1B &= ~((1<<CS11) | (1<<CS12));
+  }
+  else if(prescalar == 8)
+  {
+    TCCR1B |= (1<<CS11);
+    TCCR1B &= ~((1<<CS10) | (1<<CS12));
+  }
+  else if(prescalar == 64)
+  {
+    TCCR1B |= (1<<CS10) | (1<<CS11);
+    TCCR1B &= ~(1<<CS12);
+  }
+  else if(prescalar == 256)
+  {
+    TCCR1B |= (1<<CS12);
+    TCCR1B &= ~((1<<CS11) | (1<<CS10));
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR1B |= (1<<CS12) | (1<<CS10); 
+    TCCR1B &= ~(1<<CS11);
+  }
+  OCR1A = periodt;
+  OCR1B = dutycycle;
+  TIMSK1 |= (1<<OCIE1A) | (1<<OCIE1B);
+  sei();
+}
+
+void AnalogWriteR2(float duty, int prescalar, float period)
+{
+  float periodt = (period/(prescalar*0.0000000625f));
+  float dutycycle = (period/(prescalar*0.0000000625f))*(duty/100.00f) + 1.0f;
+  TCCR2A = 0x00;
+  if(prescalar == 1)
+  {
+    TCCR2B |= (1<<CS20);
+    TCCR2B &= ~((1<<CS21) | (1<<CS22));
+  }
+  else if(prescalar == 8)
+  {
+    TCCR2B |= (1<<CS21);
+    TCCR2B &= ~((1<<CS20) | (1<<CS22));
+  }
+  else if(prescalar == 64)
+  {
+    TCCR2B |= (1<<CS20) | (1<<CS21);
+    TCCR2B &= ~(1<<CS22);
+  }
+  else if(prescalar == 256)
+  {
+    TCCR2B |= (1<<CS22);
+    TCCR2B &= ~((1<<CS21) | (1<<CS20));
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS20); 
+    TCCR2B &= ~(1<<CS21);
+  }
+  OCR2A = periodt;
+  OCR2B = dutycycle;
+  TIMSK2 |= (1<<OCIE2A) | (1<<OCIE2B);
+  sei();
+}
