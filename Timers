@@ -1,0 +1,152 @@
+void Timer0Normal(uint16_t prescalar)
+{
+  //total duration = (1/16*10^6) * prescalar * (2^8 - 1)
+  TCCR0A = 0b00000000;
+  if(prescalar == 1)
+  {
+    TCCR0B = 0b00000001;
+  }
+  else if(prescalar == 8)
+  {
+    TCCR0B = 0b00000010;
+  }
+  else if(prescalar == 64)
+  {
+    TCCR0B = 0b00000011;
+  }
+  else if(prescalar == 256)
+  {
+    TCCR0B = 0b00000100;
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR0B = 0b00000101;
+  }
+
+  TCNT0 = 0;
+  sei();
+}
+
+void Timer1Normal(uint16_t prescalar)
+{
+  //total duration = (1/16*10^6) * prescalar * (2^16 - 1)
+  TCCR1A = 0b00000000;
+  if(prescalar == 1)
+  {
+    TCCR1B = 0b00000001;
+  }
+  else if(prescalar == 8)
+  {
+    TCCR1B = 0b00000010;
+  }
+  else if(prescalar == 64)
+  {
+    TCCR1B = 0b00000011;
+  }
+  else if(prescalar == 256)
+  {
+    TCCR1B = 0b00000100;
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR1B = 0b00000101;
+  }
+
+  TCNT1 = 0;
+  sei();
+}
+
+void Timer0CTC(uint16_t prescalar, float period)
+{
+  TCCR0A = 0b00000010;
+  if(prescalar == 1)
+  {
+    TCCR0B = 0b00000001;
+  }
+  else if(prescalar == 8)
+  {
+    TCCR0B = 0b00000010;
+  }
+  else if(prescalar == 64)
+  {
+    TCCR0B = 0b00000011;
+  }
+  else if(prescalar == 256)
+  {
+    TCCR0B = 0b00000100;
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR0B = 0b00000101;
+  }
+  
+  // period (seconds) = ocr0a * prescalar * (1/16*10^6)
+  // NOTE: MAX VALUE OF OCR0A = 255
+
+  float ocr0aVal = (period/((0.0000000625*prescalar)*255))*255;
+  OCR0A = ocr0aVal;
+  TIMSK0 = 0b00000010;
+  
+  TCNT0 = 0;
+  sei();
+}
+  // IF UR PERIOD IS NOT WITHIN THE RANGE OF TIMER0, SET 
+  // TIMER INTERRUPT DURATION TO A SUBSET OF UR IDEAL PERIOD 
+  // E.G., SET DURATION OF TIMER INTERRUPT TO 10MS WHEN 1 SECOND IS NEEDED
+  // THEN, IN THE ISR, UNCOMMENT THE COMMENTS BELOW
+
+// uint16_t timercount = 0;    //global variable
+ISR(TIMER0_COMPA_vect)
+{
+  TCNT0 = 0;
+  //timercount ++;             //increment timercount whenever isr is entered
+  //if(timercount == 100)      //1second 
+    //{}                       //do thing
+}
+
+void Timer1CTC(uint16_t prescalar, float period)
+{
+  TCCR1A = 0b00000000;
+  if(prescalar == 1)
+  {
+    TCCR1B = 0b00001001;
+  }
+  else if(prescalar == 8)
+  {
+    TCCR1B = 0b00001010;
+  }
+  else if(prescalar == 64)
+  {
+    TCCR1B = 0b00001011;
+  }
+  else if(prescalar == 256)
+  {
+    TCCR1B = 0b00001100;
+  }
+  else if(prescalar == 1024)
+  {
+    TCCR1B = 0b00001101;
+  }
+  
+  // period (seconds) = ocr0a * prescalar * (1/16*10^6)
+  // NOTE: MAX VALUE OF OCR1A = 2^16 - 1
+
+  float ocr1aVal = (period/((0.0000000625*prescalar)*65535))*65535;
+  OCR1A = ocr1aVal;
+  TIMSK1 = 0b00000010; 
+  TCNT1 = 0;
+  sei();
+}
+  // IF UR PERIOD IS NOT WITHIN THE RANGE OF TIMER1, SET 
+  // TIMER INTERRUPT DURATION TO A SUBSET OF UR IDEAL PERIOD 
+  // E.G., SET DURATION OF TIMER INTERRUPT TO 10MS WHEN 1 SECOND IS NEEDED
+  // THEN, IN THE ISR, UNCOMMENT THE COMMENTS BELOW
+
+// uint16_t timercount = 0;    //global variable
+ISR(TIMER1_COMPA_vect)
+{
+  TCNT1 = 0;
+  //timercount ++;             //increment timercount whenever isr is entered
+  //if(timercount == 100)      //1second 
+    //{}                       //do thing
+}
