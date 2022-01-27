@@ -1,0 +1,421 @@
+#define FOSC 16000000 
+#define BAUD 9600 
+#define MYUBRR FOSC/16/BAUD-1 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+/* UART Buffer Defines */
+#define UART_RX_BUFFER_SIZE 8      //2,4,8,16,32,64,128 or 256 bytes 
+#define UART_TX_BUFFER_SIZE 8
+#define UART_RX_BUFFER_MASK (UART_RX_BUFFER_SIZE - 1)
+#define UART_TX_BUFFER_MASK (UART_TX_BUFFER_SIZE - 1)
+
+/* Static Variables */
+static unsigned char UART_RxBuf[UART_RX_BUFFER_SIZE];
+static volatile unsigned char UART_RxHead;
+static volatile unsigned char UART_RxTail;
+static unsigned char UART_TxBuf[UART_TX_BUFFER_SIZE];
+static volatile unsigned char UART_TxHead;
+static volatile unsigned char UART_TxTail;
+
+int main(void)
+{
+  InitUART(MYUBRR); //calculate baud rate  
+  sei();
+  for(;;) {
+    USART_Transmit(USART_Receive()); //display data on serial monitor that is received by user input
+  }
+  return 0;
+}
+
+/* Initialize UART */
+void InitUART(unsigned char ubrr_val)
+{
+  unsigned char x;
+
+  /* Set the baud rate */
+  UBRR0H = (unsigned char)(ubrr_val>>8);
+  UBRR0L = (unsigned char)ubrr_val;
+  
+  /* Enable UART receiver and transmitter */
+  UCSR0B = ((1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0));
+
+  /* Flush receive buffer */
+  x = 0;           
+
+  UART_RxTail = x;
+  UART_RxHead = x;
+  UART_TxTail = x;
+  UART_TxHead = x;
+}
+
+/* Interrupt handlers */
+ISR(USART_RX_vect)
+{
+  unsigned char data;
+  unsigned char tmphead;
+  
+  data = UDR0; //read the received data
+  tmphead = (UART_RxHead + 1) & UART_RX_BUFFER_MASK; //calculate buffer index
+  UART_RxHead = tmphead; //store new index     
+
+  if (tmphead == UART_RxTail) {
+    /* ERROR! Receive buffer overflow */
+  }
+  UART_RxBuf[tmphead] = data; //store received data in buffer
+}
+
+ISR(USART_UDRE_vect)
+{
+  unsigned char tmptail;
+  if (UART_TxHead != UART_TxTail) //check if all data is transmitted
+  {
+    tmptail = ( UART_TxTail + 1 ) & UART_TX_BUFFER_MASK; //calculate buffer index
+    UART_TxTail = tmptail; //store new index
+    UDR0 = UART_TxBuf[tmptail]; //start transmission
+  }
+  else
+  {
+    UCSR0B &= ~(1<<UDRIE0);  //disable UDRE interrupt      
+  }
+}
+
+unsigned char USART_Receive(void)
+{
+  unsigned char tmptail;
+  
+  while (UART_RxHead == UART_RxTail); // wait for incoming data
+  tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK; //calculate buffer index
+  UART_RxTail = tmptail; //store new index
+  return UART_RxBuf[tmptail]; //return data
+}
+
+void USART_Transmit(unsigned char data)
+{
+  unsigned char tmphead;
+  tmphead = (UART_TxHead + 1) & UART_TX_BUFFER_MASK; //calculate buffer index
+  while (tmphead == UART_TxTail); //wait for free space in buffer
+  UART_TxBuf[tmphead] = data; //store data in buffer
+  UART_TxHead = tmphead; //store new index
+  UCSR0B |= (1<<UDRIE0); //enable UDRE interrupt
+}
+
+/****I2CTransmit******/
+#include <avr/io.h>
+
+/** defines the data direction (reading from I2C device) in i2c_start(),i2c_rep_start() */
+#define I2C_READ    1
+
+/** defines the data direction (writing to I2C device) in i2c_start(),i2c_rep_start() */
+#define I2C_WRITE   0
+
+#include <inttypes.h>
+#include <compat/twi.h>
+
+/* define CPU frequency in hz here if not defined in Makefile */
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+/* I2C clock in Hz */
+#define SCL_CLOCK  100000L
+
+/*************************************************************************
+ Initialization of the I2C bus interface. Need to be called only once
+*************************************************************************/
+void i2c_init(void)
+{
+  /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
+  
+  TWSR = 0;                         /* no prescaler */
+  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
+
+}/*i2c_unit*/
+
+/*************************************************************************	
+  Issues a start condition and sends address and transfer direction.
+  return 0 = device accessible, 1= failed to access device
+*************************************************************************/
+unsigned char i2c_start(unsigned char address)
+{
+    uint8_t   twst;
+
+	// send START condition
+	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+
+	// wait until transmission completed
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	if ( (twst != TW_START) && (twst != TW_REP_START)) return 1;
+
+	// send device address
+	TWDR = address;
+	TWCR = (1<<TWINT) | (1<<TWEN);
+
+	// wail until transmission completed and ACK/NACK has been received
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	if ( (twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK) ) return 1;
+
+	return 0;
+
+}/* i2c_start */
+
+/*************************************************************************
+ Issues a start condition and sends address and transfer direction.
+ If device is busy, use ack polling to wait until device is ready
+ 
+ Input:   address and transfer direction of I2C device
+*************************************************************************/
+void i2c_start_wait(unsigned char address)
+{
+    uint8_t   twst;
+    while (1)
+    {
+	    // send START condition
+	    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+    
+    	// wait until transmission completed
+    	while(!(TWCR & (1<<TWINT)));
+    
+    	// check value of TWI Status Register. Mask prescaler bits.
+    	twst = TW_STATUS & 0xF8;
+    	if ( (twst != TW_START) && (twst != TW_REP_START)) continue;
+    
+    	// send device address
+    	TWDR = address;
+    	TWCR = (1<<TWINT) | (1<<TWEN);
+    
+    	// wail until transmission completed
+    	while(!(TWCR & (1<<TWINT)));
+    
+    	// check value of TWI Status Register. Mask prescaler bits.
+    	twst = TW_STATUS & 0xF8;
+    	if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) ) 
+    	{    	    
+    	    /* device busy, send stop condition to terminate write operation */
+	        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+	        
+	        // wait until stop condition is executed and bus released
+	        while(TWCR & (1<<TWSTO));
+	        
+    	    continue;
+    	}
+    	//if( twst != TW_MT_SLA_ACK) return 1;
+    	break;
+     }
+
+}/* i2c_start_wait */
+
+
+/*************************************************************************
+ Issues a repeated start condition and sends address and transfer direction 
+
+ Input:   address and transfer direction of I2C device
+ 
+ Return:  0 device accessible
+          1 failed to access device
+*************************************************************************/
+unsigned char i2c_rep_start(unsigned char address)
+{
+    return i2c_start( address );
+
+}/* i2c_rep_start */
+
+
+/*************************************************************************
+ Terminates the data transfer and releases the I2C bus
+*************************************************************************/
+void i2c_stop(void)
+{
+    /* send stop condition */
+	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+	
+	// wait until stop condition is executed and bus released
+	while(TWCR & (1<<TWSTO));
+
+}/* i2c_stop */
+
+
+/*************************************************************************
+  Send one byte to I2C device
+  
+  Input:    byte to be transfered
+  Return:   0 write successful 
+            1 write failed
+*************************************************************************/
+unsigned char i2c_write( unsigned char data )
+{	
+    uint8_t   twst;
+    
+	// send data to the previously addressed device
+	TWDR = data;
+	TWCR = (1<<TWINT) | (1<<TWEN);
+
+	// wait until transmission completed
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits
+	twst = TW_STATUS & 0xF8;
+	if( twst != TW_MT_DATA_ACK) return 1;
+	return 0;
+
+}/* i2c_write */
+
+
+/*************************************************************************
+ Read one byte from the I2C device, request more data from device 
+ 
+ Return:  byte read from I2C device
+*************************************************************************/
+unsigned char i2c_readAck(void)
+{
+	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
+	while(!(TWCR & (1<<TWINT)));    
+
+    return TWDR;
+
+}/* i2c_readAck */
+
+/*************************************************************************
+ Read one byte from the I2C device, read is followed by a stop condition 
+ 
+ Return:  byte read from I2C device
+*************************************************************************/
+unsigned char i2c_readNak(void)
+{
+	TWCR = (1<<TWINT) | (1<<TWEN);
+	while(!(TWCR & (1<<TWINT)));
+	
+    return TWDR;
+
+}/* i2c_readNak */
+
+#define I2C_ADDR 4
+
+int main(void)
+{
+  i2c_init();
+  while(1)
+  {
+	i2c_start_wait((I2C_ADDR<<1) + 0); //i2c_start_wait((address<<1) + Write(0)/Read(1)
+    i2c_write(0x61);
+  	i2c_stop();
+    _delay_ms(500);
+    
+    i2c_start_wait((I2C_ADDR<<1) + 0); //i2c_start_wait((address<<1) + Write(0)/Read(1)
+    i2c_write(0x62);
+  	i2c_stop();
+    _delay_ms(500); 
+  }
+}
+
+
+/*****I2CReceive*******/
+#include <util/twi.h>
+#include <avr/interrupt.h>
+#include <stdint.h>
+
+void I2C_init(uint8_t address);
+void I2C_stop(void);
+void I2C_setCallbacks(void (*recv)(uint8_t), void (*req)());
+
+inline void __attribute__((always_inline)) I2C_transmitByte(uint8_t data)
+{
+  TWDR = data;
+}
+
+ISR(TWI_vect);
+
+static void (*I2C_recv)(uint8_t);
+static void (*I2C_req)();
+
+void I2C_setCallbacks(void (*recv)(uint8_t), void (*req)())
+{
+  I2C_recv = recv;
+  I2C_req = req;
+}
+
+void I2C_init(uint8_t address)
+{
+  cli();
+  // load address into TWI address register
+  TWAR = address << 1;
+  // set the TWCR to enable address matching and enable TWI, clear TWINT, enable TWI interrupt
+  TWCR = (1<<TWIE) | (1<<TWEA) | (1<<TWINT) | (1<<TWEN);
+  sei();
+}
+
+void I2C_stop(void)
+{
+  // clear acknowledge and enable bits
+  cli();
+  TWCR = 0;
+  TWAR = 0;
+  sei();
+}
+
+ISR(TWI_vect)
+{
+  switch(TW_STATUS)
+  {
+    case TW_SR_DATA_ACK:
+      // received data from master, call the receive callback
+      I2C_recv(TWDR); 
+      TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+      break;
+    case TW_ST_SLA_ACK:
+      // master is requesting data, call the request callback
+      I2C_req();
+      TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+      break;
+    case TW_ST_DATA_ACK:
+      // master is requesting data, call the request callback
+      I2C_req();
+      TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+      break;
+    case TW_BUS_ERROR:
+      // some sort of erroneous state, prepare TWI to be readdressed
+      TWCR = 0;
+      TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN); 
+      break;
+    default:
+      TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+      break;
+  }
+} 
+
+#define I2C_ADDR 4
+
+volatile uint8_t data;
+
+void I2C_received(uint8_t received_data)
+{
+  data = received_data;
+  if(data == 0x61)
+  {
+    PORTB |= (1<<PB1);
+  }
+  if(data == 0x62)
+  {
+    PORTB &= ~(1<<PB1);
+  }
+}
+
+void I2C_requested()
+{
+  I2C_transmitByte(data);
+}
+
+int main()
+{
+  DDRB |= (1<DDB1);
+  I2C_setCallbacks(I2C_received, I2C_requested);
+  I2C_init(I2C_ADDR);
+  while(1);
+}
