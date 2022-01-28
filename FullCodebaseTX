@@ -1,0 +1,1257 @@
+#define OUTPUT_0 DDRD |= (1<<DDD0)
+#define OUTPUT_1 DDRD |= (1<<DDD1)
+#define OUTPUT_2 DDRD |= (1<<DDD2)
+#define OUTPUT_3 DDRD |= (1<<DDD3)
+#define OUTPUT_4 DDRD |= (1<<DDD4)
+#define OUTPUT_5 DDRD |= (1<<DDD5)
+#define OUTPUT_6 DDRD |= (1<<DDD6)
+#define OUTPUT_7 DDRD |= (1<<DDD7)
+#define OUTPUT_8 DDRB |= (1<<DDB0)
+#define OUTPUT_9 DDRB |= (1<<DDB1)
+#define OUTPUT_10 DDRB |= (1<<DDB2)
+#define OUTPUT_11 DDRB |= (1<<DDB3)
+#define OUTPUT_12 DDRB |= (1<<DDB4)
+#define OUTPUT_13 DDRB |= (1<<DDB5)
+#define INPUT_0 DDRD &= ~(1<<DDD0)
+#define INPUT_1 DDRD &= ~(1<<DDD1)
+#define INPUT_2 DDRD &= ~(1<<DDD2)
+#define INPUT_3 DDRD &= ~(1<<DDD3)
+#define INPUT_4 DDRD &= ~(1<<DDD4)
+#define INPUT_5 DDRD &= ~(1<<DDD5)
+#define INPUT_6 DDRD &= ~(1<<DDD6)
+#define INPUT_7 DDRD &= ~(1<<DDD7)
+#define INPUT_8 DDRB &= ~(1<<DDB0)
+#define INPUT_9 DDRB &= ~(1<<DDB1)
+#define INPUT_10 DDRB &= ~(1<<DDB2)
+#define INPUT_11 DDRB &= ~(1<<DDB3)
+#define INPUT_12 DDRB &= ~(1<<DDB4)
+#define INPUT_13 DDRB &= ~(1<<DDB5)
+#define ON_0 PORTD |= (1<<PD0)
+#define ON_1 PORTD |= (1<<PD1)
+#define ON_2 PORTD |= (1<<PD2)
+#define ON_3 PORTD |= (1<<PD3)
+#define ON_4 PORTD |= (1<<PD4)
+#define ON_5 PORTD |= (1<<PD5)
+#define ON_6 PORTD |= (1<<PD6)
+#define ON_7 PORTD |= (1<<PD7)
+#define ON_8 PORTB |= (1<<PB0)
+#define ON_9 PORTB |= (1<<PB1)
+#define ON_10 PORTB |= (1<<PB2)
+#define ON_11 PORTB |= (1<<PB3)
+#define ON_12 PORTB |= (1<<PB4)
+#define ON_13 PORTB |= (1<<PB5)
+#define OFF_0 PORTD &= ~(1<<PD0)
+#define OFF_1 PORTD &= ~(1<<PD1)
+#define OFF_2 PORTD &= ~(1<<PD2)
+#define OFF_3 PORTD &= ~(1<<PD3)
+#define OFF_4 PORTD &= ~(1<<PD4)
+#define OFF_5 PORTD &= ~(1<<PD5)
+#define OFF_6 PORTD &= ~(1<<PD6)
+#define OFF_7 PORTD &= ~(1<<PD7)
+#define OFF_8 PORTB &= ~(1<<PB0)
+#define OFF_9 PORTB &= ~(1<<PB1)
+#define OFF_10 PORTB &= ~(1<<PB2)
+#define OFF_11 PORTB &= ~(1<<PB3)
+#define OFF_12 PORTB &= ~(1<<PB4)
+#define OFF_13 PORTB &= ~(1<<PB5)
+#define TOGGLE_0 PORTD ^= (1<<PD0)
+#define TOGGLE_1 PORTD ^= (1<<PD1)
+#define TOGGLE_2 PORTD ^= (1<<PD2)
+#define TOGGLE_3 PORTD ^= (1<<PD3)
+#define TOGGLE_4 PORTD ^= (1<<PD4)
+#define TOGGLE_5 PORTD ^= (1<<PD5)
+#define TOGGLE_6 PORTD ^= (1<<PD6)
+#define TOGGLE_7 PORTD ^= (1<<PD7)
+#define TOGGLE_8 PORTB ^= (1<<PB0)
+#define TOGGLE_9 PORTB ^= (1<<PB1)
+#define TOGGLE_10 PORTB ^= (1<<PB2)
+#define TOGGLE_11 PORTB ^= (1<<PB3)
+#define TOGGLE_12 PORTB ^= (1<<PB4)
+#define TOGGLE_13 PORTB ^= (1<<PB5)
+#define L_0 (PIND & (1<<PD0))
+#define L_1 (PIND & (1<<PD1))
+#define L_2 (PIND & (1<<PD2))
+#define L_3 (PIND & (1<<PD3))
+#define L_4 (PIND & (1<<PD4))
+#define L_5 (PIND & (1<<PD5))
+#define L_6 (PIND & (1<<PD6))
+#define L_7 (PIND & (1<<PD7))
+#define L_8 (PINB & (1<<PB0))
+#define L_9 (PINB & (1<<PB1))
+#define L_10 (PINB & (1<<PB2))
+#define L_11 (PINB & (1<<PB3))
+#define L_12 (PINB & (1<<PB4))
+#define L_13 (PINB & (1<<PB5))
+#define DISPLAY0 0b00111111
+#define DISPLAY1 0b00000110
+#define DISPLAY2 0b01011011
+#define DISPLAY3 0b01001111
+#define DISPLAY4 0b01100110
+#define DISPLAY5 0b01101101
+#define DISPLAY6 0b01111100
+#define DISPLAY7 0b00000111
+#define DISPLAY8 0b01111111
+#define DISPLAY9 0b01100111
+
+#define FOSC 16000000 
+#define BAUD 9600 
+#define MYUBRR FOSC/16/BAUD-1 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+/* UART Buffer Defines */
+#define UART_RX_BUFFER_SIZE 8      //2,4,8,16,32,64,128 or 256 bytes 
+#define UART_TX_BUFFER_SIZE 8
+#define UART_RX_BUFFER_MASK (UART_RX_BUFFER_SIZE - 1)
+#define UART_TX_BUFFER_MASK (UART_TX_BUFFER_SIZE - 1)
+
+/* Static Variables */
+static unsigned char UART_RxBuf[UART_RX_BUFFER_SIZE];
+static volatile unsigned char UART_RxHead;
+static volatile unsigned char UART_RxTail;
+static unsigned char UART_TxBuf[UART_TX_BUFFER_SIZE];
+static volatile unsigned char UART_TxHead;
+static volatile unsigned char UART_TxTail;
+
+/* Initialize UART */
+void InitUART(unsigned char ubrr_val)
+{
+  unsigned char x;
+
+  /* Set the baud rate */
+  UBRR0H = (unsigned char)(ubrr_val>>8);
+  UBRR0L = (unsigned char)ubrr_val;
+  
+  /* Enable UART receiver and transmitter */
+  UCSR0B = ((1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0));
+
+  /* Flush receive buffer */
+  x = 0;           
+
+  UART_RxTail = x;
+  UART_RxHead = x;
+  UART_TxTail = x;
+  UART_TxHead = x;
+}
+unsigned char USART_Receive(void)
+{
+  unsigned char tmptail;
+  
+  while (UART_RxHead == UART_RxTail); // wait for incoming data
+  tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK; //calculate buffer index
+  UART_RxTail = tmptail; //store new index
+  return UART_RxBuf[tmptail]; //return data
+}
+
+void USART_Transmit(unsigned char data)
+{
+  unsigned char tmphead;
+  tmphead = (UART_TxHead + 1) & UART_TX_BUFFER_MASK; //calculate buffer index
+  while (tmphead == UART_TxTail); //wait for free space in buffer
+  UART_TxBuf[tmphead] = data; //store data in buffer
+  UART_TxHead = tmphead; //store new index
+  UCSR0B |= (1<<UDRIE0); //enable UDRE interrupt
+}
+
+/** defines the data direction (reading from I2C device) in i2c_start(),i2c_rep_start() */
+#define I2C_READ    1
+
+/** defines the data direction (writing to I2C device) in i2c_start(),i2c_rep_start() */
+#define I2C_WRITE   0
+
+#include <inttypes.h>
+#include <compat/twi.h>
+
+/* define CPU frequency in hz here if not defined in Makefile */
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+/* I2C clock in Hz */
+#define SCL_CLOCK  100000L
+
+/*************************************************************************
+ Initialization of the I2C bus interface. Need to be called only once
+*************************************************************************/
+void i2c_init(void)
+{
+  /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
+  
+  TWSR = 0;                         /* no prescaler */
+  TWBR = ((F_CPU/SCL_CLOCK)-16)/2;  /* must be > 10 for stable operation */
+
+}/*i2c_unit*/
+
+/*************************************************************************	
+  Issues a start condition and sends address and transfer direction.
+  return 0 = device accessible, 1= failed to access device
+*************************************************************************/
+unsigned char i2c_start(unsigned char address)
+{
+    uint8_t   twst;
+
+	// send START condition
+	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+
+	// wait until transmission completed
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	if ( (twst != TW_START) && (twst != TW_REP_START)) return 1;
+
+	// send device address
+	TWDR = address;
+	TWCR = (1<<TWINT) | (1<<TWEN);
+
+	// wail until transmission completed and ACK/NACK has been received
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	if ( (twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK) ) return 1;
+
+	return 0;
+
+}/* i2c_start */
+
+/*************************************************************************
+ Issues a start condition and sends address and transfer direction.
+ If device is busy, use ack polling to wait until device is ready
+ 
+ Input:   address and transfer direction of I2C device
+*************************************************************************/
+void i2c_start_wait(unsigned char address)
+{
+    uint8_t   twst;
+    while (1)
+    {
+	    // send START condition
+	    TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+    
+    	// wait until transmission completed
+    	while(!(TWCR & (1<<TWINT)));
+    
+    	// check value of TWI Status Register. Mask prescaler bits.
+    	twst = TW_STATUS & 0xF8;
+    	if ( (twst != TW_START) && (twst != TW_REP_START)) continue;
+    
+    	// send device address
+    	TWDR = address;
+    	TWCR = (1<<TWINT) | (1<<TWEN);
+    
+    	// wail until transmission completed
+    	while(!(TWCR & (1<<TWINT)));
+    
+    	// check value of TWI Status Register. Mask prescaler bits.
+    	twst = TW_STATUS & 0xF8;
+    	if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) ) 
+    	{    	    
+    	    /* device busy, send stop condition to terminate write operation */
+	        TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+	        
+	        // wait until stop condition is executed and bus released
+	        while(TWCR & (1<<TWSTO));
+	        
+    	    continue;
+    	}
+    	//if( twst != TW_MT_SLA_ACK) return 1;
+    	break;
+     }
+
+}/* i2c_start_wait */
+
+
+/*************************************************************************
+ Issues a repeated start condition and sends address and transfer direction 
+
+ Input:   address and transfer direction of I2C device
+ 
+ Return:  0 device accessible
+          1 failed to access device
+*************************************************************************/
+unsigned char i2c_rep_start(unsigned char address)
+{
+    return i2c_start( address );
+
+}/* i2c_rep_start */
+
+
+/*************************************************************************
+ Terminates the data transfer and releases the I2C bus
+*************************************************************************/
+void i2c_stop(void)
+{
+    /* send stop condition */
+	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+	
+	// wait until stop condition is executed and bus released
+	while(TWCR & (1<<TWSTO));
+
+}/* i2c_stop */
+
+
+/*************************************************************************
+  Send one byte to I2C device
+  
+  Input:    byte to be transfered
+  Return:   0 write successful 
+            1 write failed
+*************************************************************************/
+unsigned char i2c_write( unsigned char data )
+{	
+    uint8_t   twst;
+    
+	// send data to the previously addressed device
+	TWDR = data;
+	TWCR = (1<<TWINT) | (1<<TWEN);
+
+	// wait until transmission completed
+	while(!(TWCR & (1<<TWINT)));
+
+	// check value of TWI Status Register. Mask prescaler bits
+	twst = TW_STATUS & 0xF8;
+	if( twst != TW_MT_DATA_ACK) return 1;
+	return 0;
+
+}/* i2c_write */
+
+
+/*************************************************************************
+ Read one byte from the I2C device, request more data from device 
+ 
+ Return:  byte read from I2C device
+*************************************************************************/
+unsigned char i2c_readAck(void)
+{
+	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
+	while(!(TWCR & (1<<TWINT)));    
+
+    return TWDR;
+
+}/* i2c_readAck */
+
+/*************************************************************************
+ Read one byte from the I2C device, read is followed by a stop condition 
+ 
+ Return:  byte read from I2C device
+*************************************************************************/
+unsigned char i2c_readNak(void)
+{
+	TWCR = (1<<TWINT) | (1<<TWEN);
+	while(!(TWCR & (1<<TWINT)));
+	
+    return TWDR;
+
+}/* i2c_readNak */
+
+#define I2C_ADDR 4
+
+
+float AnalogReadR(int channel)
+{
+  ADCSRA |= (1<<ADEN); // enables ADC
+  //ADCSRA |= (1<<ADIE);  // enables ADC interrupt
+  
+  //ADCSRA |= (1<<ADPS0);                // division factor = 2, ADC clock = (16/2)=8MHz
+  //ADCSRA |= (1<<ADPS1);                // division factor = 4, ADC clock = (16/4)=4MHz
+  ADCSRA |= (1<<ADPS1) | (1<<ADPS0);     // division factor = 8, ADC clock = (16/8)=2MHz
+  //ADCSRA |= (1<<ADPS2);                // division factor = 16, ADC clock = (16/16)=1MHz
+  //ADCSRA |= (1<<ADPS0) | (1<<ADPS2);   // division factor = 32, ADC clock = (16/32)=0.5MHz
+  //ADCSRA |= (1<<ADPS1) | (1<<ADPS2);   // division factor = 64, ADC clock = (16/64)=0.25MHz
+  //ADCSRA |= (1<<ADPS0) | (1<<ADPS1) | (1<<ADPS2);   // division factor = 128, ADC clock = (16/128)=0.125MHz
+  
+  //ADMUX &= ~((1<<REFS0) | (1<<REFS1)); // voltage reference = AREF
+  ADMUX = 0b01000000;                    // voltage reference = 5.0V   (ADMUX &= ~(1<<REFS1) + ADMUX |= (1<<REFS0))
+  //ADMUX = 0b11000000;                  // voltage reference = 1.1V   (ADMUX |= (1<<REFS1) | (1<<REFS0))
+  
+  ADMUX &= ~(1<<ADLAR);                  // set data alignment to right justification
+  //ADMUX |= (1<<ADLAR);                 // set data alignment to left justification
+  
+  if(channel == 0)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3); 
+  }
+  else if(channel == 1)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 2)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 3)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX |= (1<<MUX1);
+    ADMUX &= ~(1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 4)
+  {
+    ADMUX &= ~(1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2); 
+    ADMUX &= ~(1<<MUX3);
+  }
+  else if(channel == 5)
+  {
+    ADMUX |= (1<<MUX0);
+    ADMUX &= ~(1<<MUX1);
+    ADMUX |= (1<<MUX2);
+    ADMUX &= ~(1<<MUX3);
+  }
+  ADCSRA |= (1<<ADSC); // start ADC conversion
+  while(ADCSRA & (1<<ADSC));  // remove if ADC interrupt enabled
+  
+  float adc_value = ADCL | (ADCH << 8);          // right justification
+  //float adc_value = (ADCL >> 6) | (ADCH << 2); // left justification
+  
+  return (adc_value*5.0f/1023.0f);
+}
+void AnalogWriteR0(int duty, int prescaler, float period)
+{
+  float slave = (float)duty;
+  float anotherslave = (float)prescaler;
+  int periodt = (int)((period/(anotherslave*0.0000000625f)) - 1.0f);
+  int dutycycle = (int)((period/(anotherslave*0.0000000625f))*(slave/100.0f) - 1.0f);
+  TCCR0A = 0x00;
+  if(prescaler == 1)
+  {
+    TCCR0B |= (1<<CS00);
+    TCCR0B &= ~((1<<CS01) | (1<<CS02));
+  }
+  else if(prescaler == 8)
+  {
+    TCCR0B |= (1<<CS01);
+    TCCR0B &= ~((1<<CS00) | (1<<CS02));
+  }
+  else if(prescaler == 64)
+  {
+    TCCR0B |= (1<<CS00) | (1<<CS01);
+    TCCR0B &= ~(1<<CS02);
+  }
+  else if(prescaler == 256)
+  {
+    TCCR0B |= (1<<CS02);
+    TCCR0B &= ~((1<<CS01) | (1<<CS00));
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR0B |= (1<<CS02) | (1<<CS00); 
+    TCCR0B &= ~(1<<CS01);
+  }
+  OCR0A = periodt;
+  OCR0B = dutycycle;
+  TIMSK0 |= (1<<OCIE0A) | (1<<OCIE0B);
+  sei();
+}
+void AnalogWriteR1(int duty, int prescaler, float period)
+{
+  float anotherslave = (float)duty;
+  float slave = (float)prescaler;
+  int periodt = (int)((period/(slave*0.0000000625f)) - 1.0f);
+  int dutycycle = (int)((period/(slave*0.0000000625f))*(anotherslave/100.0f) - 1.0f);
+  TCCR1A = 0x00;
+  if(prescaler == 1)
+  {
+    TCCR1B |= (1<<CS10);
+    TCCR1B &= ~((1<<CS11) | (1<<CS12));
+  }
+  else if(prescaler == 8)
+  {
+    TCCR1B |= (1<<CS11);
+    TCCR1B &= ~((1<<CS10) | (1<<CS12));
+  }
+  else if(prescaler == 64)
+  {
+    TCCR1B |= (1<<CS10) | (1<<CS11);
+    TCCR1B &= ~(1<<CS12);
+  }
+  else if(prescaler == 256)
+  {
+    TCCR1B |= (1<<CS12);
+    TCCR1B &= ~((1<<CS11) | (1<<CS10));
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR1B |= (1<<CS12) | (1<<CS10); 
+    TCCR1B &= ~(1<<CS11);
+  }
+  OCR1A = periodt;
+  OCR1B = dutycycle;
+  TIMSK1 |= (1<<OCIE1A) | (1<<OCIE1B);
+  sei();
+}
+void AnalogWriteR2(int duty, int prescaler, float period)
+{
+  float slave = (float)duty;
+  float anotherslave = (float)prescaler;
+  int periodt = (int)((period/(anotherslave*0.0000000625f)) - 1.0f);
+  int dutycycle = (int)((period/(anotherslave*0.0000000625f))*(slave/100.0f) - 1.0f);
+  TCCR2A = 0x00;
+  if(prescaler == 1)
+  {
+    TCCR2B |= (1<<CS20);
+    TCCR2B &= ~((1<<CS21) | (1<<CS22));
+  }
+  else if(prescaler == 8)
+  {
+    TCCR2B |= (1<<CS21);
+    TCCR2B &= ~((1<<CS20) | (1<<CS22));
+  }
+  else if(prescaler == 32)
+  {
+    TCCR2B |= (1<<CS21) | (1<<CS20);
+    TCCR2B &= ~(1<<CS22);
+  }
+  else if(prescaler == 64)
+  {
+    TCCR2B |= (1<<CS22);
+    TCCR2B &= ~((1<<CS20) | (1<<CS21));
+  }
+  else if(prescaler == 128)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS20); 
+    TCCR2B &= ~(1<<CS21);
+  }
+  else if(prescaler == 256)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS21);
+    TCCR2B &= ~(1<<CS20);
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR2B |= (1<<CS20) | (1<<CS21) | (1<<CS22);
+  }
+  OCR2A = periodt;
+  OCR2B = dutycycle;
+  TIMSK2 |= (1<<OCIE2A) | (1<<OCIE2B);
+  sei();
+}
+void wait_ms(unsigned int ms)
+{
+  for(unsigned int i=0; i < ms; i++)
+  {
+    _delay_ms(1);
+  }
+}
+void extInterrupt(int ext, int control)//ext is to choose INT1 or INT0. 1 = INT1, 0 = INT0. If you want pin change, control = 0, falling edge, control = 1, rising edge, control = 2
+{
+  if (ext == 1)
+  {
+    INPUT_3;
+    EIMSK |= (1<<INT1);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC11);
+      EICRA |= (1<<ISC10);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC10);
+      EICRA |= (1<<ISC11);
+    }
+  }
+  else if (ext == 0)
+  {
+    INPUT_2;
+    EIMSK |= (1<<INT0);
+    if (control == 0)//pin change
+    {
+      EICRA &=~(1<<ISC01);
+      EICRA |= (1<<ISC00);
+    }
+    else if (control == 1)//falling edge
+    {
+      EICRA &=~(1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+    else if (control == 2)//rising edge
+    {
+      EICRA |= (1<<ISC00);
+      EICRA |= (1<<ISC01);
+    }
+  }
+ sei();
+}
+void pcInterrupt(int pin)
+{
+  static int pcint;
+  if(pin == 0)
+  {
+    INPUT_0;
+    pcint = 16;
+  }
+  else if(pin == 1)
+  {
+    INPUT_1;
+    pcint = 17;
+  }
+  else if(pin == 2)
+  {
+    INPUT_2;
+    pcint = 18;
+  }
+  else if(pin == 3)
+  {
+    INPUT_3;
+    pcint = 19;
+  }
+  else if(pin == 4)
+  {
+    INPUT_4;
+    pcint = 20;
+  }
+  else if(pin == 5)
+  {
+    INPUT_5;
+    pcint = 21;
+  }
+  else if(pin == 6)
+  {
+    INPUT_6;
+    pcint = 22;
+  }
+  else if(pin == 7)
+  {
+    INPUT_7;
+    pcint = 23;
+  }
+  else if(pin == 8)
+  {
+    INPUT_8;
+    pcint = 0;
+  }
+  else if(pin == 9)
+  {
+    INPUT_9;
+    pcint = 1;
+  }
+  else if(pin == 10)
+  {
+    INPUT_10;
+    pcint = 2;
+  }
+  else if(pin == 11)
+  {
+    INPUT_11;
+    pcint = 3;
+  }
+  else if(pin == 12)
+  {
+    INPUT_12;
+    pcint = 4;
+  }
+  else if(pin == 13)
+  {
+    INPUT_13;
+    pcint = 5;
+  }
+  if(pcint >= 0 && pcint <= 7)
+  {
+    if(pcint == 0)
+    {
+      PCMSK0 |= (1<<PCINT0);
+    }
+    else if(pcint == 1)
+    {
+      PCMSK0 |= (1<<PCINT1);
+    }
+    else if(pcint == 2)
+    {
+      PCMSK0 |= (1<<PCINT2);
+    }
+    else if(pcint == 3)
+    {
+      PCMSK0 |= (1<<PCINT3);
+    }
+    else if(pcint == 4)
+    {
+      PCMSK0 |= (1<<PCINT4);
+    }
+    else if(pcint == 5)
+    {
+      PCMSK0 |= (1<<PCINT5);
+    }
+    else if(pcint == 6)
+    {
+      PCMSK0 |= (1<<PCINT6);
+    }
+    else if(pcint == 7)
+    {
+      PCMSK0 |= (1<<PCINT7);
+    }
+    PCICR |= (1<<PCIE0);
+  }
+  else if(pcint >= 8 && pcint <= 14)
+  {
+    if(pcint == 8)
+    {
+      PCMSK1 |= (1<<PCINT8);
+    }
+    else if(pcint == 9)
+    {
+      PCMSK1 |= (1<<PCINT9);
+    }
+    else if(pcint == 10)
+    {
+      PCMSK1 |= (1<<PCINT10);
+    }
+    else if(pcint == 11)
+    {
+      PCMSK1 |= (1<<PCINT11);
+    }
+    else if(pcint == 12)
+    {
+      PCMSK1 |= (1<<PCINT12);
+    }
+    else if(pcint == 13)
+    {
+      PCMSK1 |= (1<<PCINT13);
+    }
+    else if(pcint == 14)
+    {
+      PCMSK1 |= (1<<PCINT14);
+    }
+    PCICR |= (1<<PCIE1);
+  }
+  else if(pcint >= 16 && pcint <= 23)
+  {
+    if(pcint == 16)
+    {
+      PCMSK2 |= (1<<PCINT16);
+    }
+    else if(pcint == 17)
+    {
+      PCMSK2 |= (1<<PCINT17);
+    }
+    else if(pcint == 18)
+    {
+      PCMSK2 |= (1<<PCINT18);
+    }
+    else if(pcint == 19)
+    {
+      PCMSK2 |= (1<<PCINT19);
+    }
+    else if(pcint == 20)
+    {
+      PCMSK2 |= (1<<PCINT20);
+    }
+    else if(pcint == 21)
+    {
+      PCMSK2 |= (1<<PCINT21);
+    }
+    else if(pcint == 22)
+    {
+      PCMSK2 |= (1<<PCINT22);
+    }
+    else if(pcint == 23)
+    {
+      PCMSK2 |= (1<<PCINT23);
+    }
+    PCICR |= (1<<PCIE2);
+  }
+  sei();
+}
+void FastPWM(int PWMpin, float duty, int prescaler)
+{
+  if(PWMpin == 6)
+  {
+    DDRD |= (1<<DDD6);  
+    OCR0A = (255/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR0A |= (1<<COM0A1) | (1<<WGM01) | (1<<WGM00);
+    if(prescaler == 1)
+    {
+      TCCR0B |= (1<<CS00);
+      TCCR0B &= ~((1<<CS01) | (1<<CS02));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR0B |= (1<<CS01);
+      TCCR0B &= ~((1<<CS00) | (1<<CS02));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR0B |= (1<<CS00) | (1<<CS01);
+      TCCR0B &= ~(1<<CS02);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR0B |= (1<<CS02);
+      TCCR0B &= ~((1<<CS01) | (1<<CS00));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR0B |= (1<<CS02) | (1<<CS00); 
+      TCCR0B &= ~(1<<CS01);
+    }
+    
+  }
+  else if (PWMpin == 5)
+  {
+    DDRD |= (1<<DDD5);  
+    OCR0A = (255/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR0A |= (1<<COM0B1) | (1<<WGM01) | (1<<WGM00);	
+    if(prescaler == 1)
+    {
+      TCCR0B |= (1<<CS00);
+      TCCR0B &= ~((1<<CS01) | (1<<CS02));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR0B |= (1<<CS01);
+      TCCR0B &= ~((1<<CS00) | (1<<CS02));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR0B |= (1<<CS00) | (1<<CS01);
+      TCCR0B &= ~(1<<CS02);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR0B |= (1<<CS02);
+      TCCR0B &= ~((1<<CS01) | (1<<CS00));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR0B |= (1<<CS02) | (1<<CS00); 
+      TCCR0B &= ~(1<<CS01);
+    }
+  }
+  else if (PWMpin == 3)
+  {
+    DDRD |= (1<<DDD3);  
+    OCR2B = (255/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR2A |= (1<<COM2B1) | (1<<WGM21) | (1<<WGM20);	
+    if(prescaler == 1)
+    {
+      TCCR2B |= (1<<CS20);
+      TCCR2B &= ~((1<<CS21) | (1<<CS22));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR2B |= (1<<CS21);
+      TCCR2B &= ~((1<<CS20) | (1<<CS22));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR2B |= (1<<CS20) | (1<<CS21);
+      TCCR2B &= ~(1<<CS22);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR2B |= (1<<CS22);
+      TCCR2B &= ~((1<<CS21) | (1<<CS20));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR2B |= (1<<CS22) | (1<<CS20); 
+      TCCR2B &= ~(1<<CS21);
+    }
+  }
+  else if (PWMpin == 11)
+  {
+    DDRB |= (1<<DDB3);
+    OCR2A = (255/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR2A |= (1<<COM2A1) | (1<<WGM21) | (1<<WGM20);	
+    if(prescaler == 1)
+    {
+      TCCR2B |= (1<<CS20);
+      TCCR2B &= ~((1<<CS21) | (1<<CS22));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR2B |= (1<<CS21);
+      TCCR2B &= ~((1<<CS20) | (1<<CS22));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR2B |= (1<<CS20) | (1<<CS21);
+      TCCR2B &= ~(1<<CS22);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR2B |= (1<<CS22);
+      TCCR2B &= ~((1<<CS21) | (1<<CS20));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR2B |= (1<<CS22) | (1<<CS20); 
+      TCCR2B &= ~(1<<CS21);
+    }
+  }
+  else if (PWMpin == 9)
+  {
+    DDRB |= (1<<DDB1);  
+    OCR1A = (65535/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR1A |= (1<<COM1A1) | (1<<WGM11) | (1<<WGM10);	
+    if(prescaler == 1)
+    {
+      TCCR1B |= (1<<CS10);
+      TCCR1B &= ~((1<<CS11) | (1<<CS12));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR1B |= (1<<CS11);
+      TCCR1B &= ~((1<<CS10) | (1<<CS12));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR1B |= (1<<CS10) | (1<<CS11);
+      TCCR1B &= ~(1<<CS12);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR1B |= (1<<CS12);
+      TCCR1B &= ~((1<<CS11) | (1<<CS10));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR1B |= (1<<CS12) | (1<<CS10); 
+      TCCR1B &= ~(1<<CS11);
+    }
+  }
+  else if (PWMpin == 10)
+  {
+    DDRB |= (1<<DDB2);  
+    OCR1B = (65535/(prescaler*0.0000000625f))*(duty/100.00f) - 1.0f;
+	TCCR1A |= (1<<COM1B1) | (1<<WGM11) | (1<<WGM10);	
+    if(prescaler == 1)
+    {
+      TCCR1B |= (1<<CS10);
+      TCCR1B &= ~((1<<CS11) | (1<<CS12));
+    }
+    else if(prescaler == 8)
+    {
+      TCCR1B |= (1<<CS11);
+      TCCR1B &= ~((1<<CS10) | (1<<CS12));
+    }
+    else if(prescaler == 64)
+    {
+      TCCR1B |= (1<<CS10) | (1<<CS11);
+      TCCR1B &= ~(1<<CS12);
+    }
+    else if(prescaler == 256)
+    {
+      TCCR1B |= (1<<CS12);
+      TCCR1B &= ~((1<<CS11) | (1<<CS10));
+    }
+    else if(prescaler == 1024)
+    {
+      TCCR1B |= (1<<CS12) | (1<<CS10); 
+      TCCR1B &= ~(1<<CS11);
+    }
+  }
+}
+void Timer0Normal(uint16_t prescaler)
+{
+  //total duration = (1/16*10^6) * prescaler * (2^8 - 1)
+  TCCR0A = 0b00000000;
+  if(prescaler == 1)
+  {
+    TCCR0B = 0b00000001;
+  }
+  else if(prescaler == 8)
+  {
+    TCCR0B = 0b00000010;
+  }
+  else if(prescaler == 64)
+  {
+    TCCR0B = 0b00000011;
+  }
+  else if(prescaler == 256)
+  {
+    TCCR0B = 0b00000100;
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR0B = 0b00000101;
+  }
+
+  TCNT0 = 0;
+  sei();
+}
+void Timer1Normal(uint16_t prescaler)
+{
+  //total duration = (1/16*10^6) * prescaler * (2^16 - 1)
+  TCCR1A = 0b00000000;
+  if(prescaler == 1)
+  {
+    TCCR1B = 0b00000001;
+  }
+  else if(prescaler == 8)
+  {
+    TCCR1B = 0b00000010;
+  }
+  else if(prescaler == 64)
+  {
+    TCCR1B = 0b00000011;
+  }
+  else if(prescaler == 256)
+  {
+    TCCR1B = 0b00000100;
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR1B = 0b00000101;
+  }
+
+  TCNT1 = 0;
+  sei();
+}
+void Timer2Normal(uint16_t prescaler)
+{
+  //total duration = (1/16*10^6) * prescaler * (2^16 - 1)
+  TCCR2A = 0b00000000;
+  if(prescaler == 1)
+  {
+    TCCR2B |= (1<<CS20);
+    TCCR2B &= ~((1<<CS21) | (1<<CS22));
+  }
+  else if(prescaler == 8)
+  {
+    TCCR2B |= (1<<CS21);
+    TCCR2B &= ~((1<<CS20) | (1<<CS22));
+  }
+  else if(prescaler == 32)
+  {
+    TCCR2B |= (1<<CS21) | (1<<CS20);
+    TCCR2B &= ~(1<<CS22);
+  }
+  else if(prescaler == 64)
+  {
+    TCCR2B |= (1<<CS22);
+    TCCR2B &= ~((1<<CS20) | (1<<CS21));
+  }
+  else if(prescaler == 128)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS20); 
+    TCCR2B &= ~(1<<CS21);
+  }
+  else if(prescaler == 256)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS21);
+    TCCR2B &= ~(1<<CS20);
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR2B |= (1<<CS20) | (1<<CS21) | (1<<CS22);
+  }
+  TCNT2 = 0;
+  sei();
+}
+void Timer0CTC(uint16_t prescaler, float period)
+{
+  TCCR0A = 0b00000010;
+  if(prescaler == 1)
+  {
+    TCCR0B = 0b00000001;
+  }
+  else if(prescaler == 8)
+  {
+    TCCR0B = 0b00000010;
+  }
+  else if(prescaler == 64)
+  {
+    TCCR0B = 0b00000011;
+  }
+  else if(prescaler == 256)
+  {
+    TCCR0B = 0b00000100;
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR0B = 0b00000101;
+  }
+  
+  // period (seconds) = ocr0a * prescaler * (1/16*10^6)
+  // NOTE: MAX VALUE OF OCR0A = 255
+
+  float ocr0aVal = (period/((0.0000000625*prescaler)*255))*255;
+  OCR0A = ocr0aVal;
+  TIMSK0 = 0b00000010;
+  
+  TCNT0 = 0;
+  sei();
+}
+void Timer1CTC(uint16_t prescaler, float period)
+{
+  TCCR1A = 0b00000000;
+  if(prescaler == 1)
+  {
+    TCCR1B = 0b00001001;
+  }
+  else if(prescaler == 8)
+  {
+    TCCR1B = 0b00001010;
+  }
+  else if(prescaler == 64)
+  {
+    TCCR1B = 0b00001011;
+  }
+  else if(prescaler == 256)
+  {
+    TCCR1B = 0b00001100;
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR1B = 0b00001101;
+  }
+  
+  // period (seconds) = ocr0a * prescaler * (1/16*10^6)
+  // NOTE: MAX VALUE OF OCR1A = 2^16 - 1
+
+  float ocr1aVal = (period/((0.0000000625*prescaler)*65535))*65535;
+  OCR1A = ocr1aVal;
+  TIMSK1 = 0b00000010; 
+  TCNT1 = 0;
+  sei();
+}
+void Timer2CTC(uint16_t prescaler, float period)
+{
+  TCCR2A = 0b00000010;
+  if(prescaler == 1)
+  {
+    TCCR2B |= (1<<CS20);
+    TCCR2B &= ~((1<<CS21) | (1<<CS22));
+  }
+  else if(prescaler == 8)
+  {
+    TCCR2B |= (1<<CS21);
+    TCCR2B &= ~((1<<CS20) | (1<<CS22));
+  }
+  else if(prescaler == 32)
+  {
+    TCCR2B |= (1<<CS21) | (1<<CS20);
+    TCCR2B &= ~(1<<CS22);
+  }
+  else if(prescaler == 64)
+  {
+    TCCR2B |= (1<<CS22);
+    TCCR2B &= ~((1<<CS20) | (1<<CS21));
+  }
+  else if(prescaler == 128)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS20); 
+    TCCR2B &= ~(1<<CS21);
+  }
+  else if(prescaler == 256)
+  {
+    TCCR2B |= (1<<CS22) | (1<<CS21);
+    TCCR2B &= ~(1<<CS20);
+  }
+  else if(prescaler == 1024)
+  {
+    TCCR2B |= (1<<CS20) | (1<<CS21) | (1<<CS22);
+  }
+  // period (seconds) = ocr2a * prescaler * (1/16*10^6)
+  // NOTE: MAX VALUE OF OCR2A = 2^16 - 1
+  float ocr2aVal = (period/((0.0000000625*prescaler)*65535))*65535;
+  OCR2A = ocr2aVal;
+  TIMSK2 = 0b00000010; 
+  TCNT2 = 0;
+  sei();
+}
+/* Interrupt handlers */
+ISR(USART_RX_vect)
+{
+  unsigned char data;
+  unsigned char tmphead;
+  
+  data = UDR0; //read the received data
+  tmphead = (UART_RxHead + 1) & UART_RX_BUFFER_MASK; //calculate buffer index
+  UART_RxHead = tmphead; //store new index     
+
+  if (tmphead == UART_RxTail) {
+    /* ERROR! Receive buffer overflow */
+  }
+  UART_RxBuf[tmphead] = data; //store received data in buffer
+}
+
+ISR(USART_UDRE_vect)
+{
+  unsigned char tmptail;
+  if (UART_TxHead != UART_TxTail) //check if all data is transmitted
+  {
+    tmptail = ( UART_TxTail + 1 ) & UART_TX_BUFFER_MASK; //calculate buffer index
+    UART_TxTail = tmptail; //store new index
+    UDR0 = UART_TxBuf[tmptail]; //start transmission
+  }
+  else
+  {
+    UCSR0B &= ~(1<<UDRIE0);  //disable UDRE interrupt      
+  }
+}
+ISR(INT0_vect)
+{
+}
+ISR(INT1_vect)
+{
+}
+ISR(PCINT0_vect)
+{
+}
+ISR(PCINT1_vect)
+{
+}
+ISR(PCINT2_vect)
+{
+}
+ISR(TIMER2_COMPA_vect)
+{
+}
+ISR(TIMER2_COMPB_vect)
+{
+}
+ISR(TIMER1_COMPA_vect)
+{
+}
+ISR(TIMER1_COMPB_vect)
+{
+}
+ISR(TIMER0_COMPA_vect)
+{
+}
+ISR(TIMER0_COMPB_vect)
+{
+}
+ISR(ADC_vect)
+{
+}
+//Common Anode 7 segment
+unsigned char numbers[10] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90};
+//Common Cathode 7 segment
+unsigned char pattern[10] = {DISPLAY0, DISPLAY1, DISPLAY2, DISPLAY3, DISPLAY4, DISPLAY5, DISPLAY6, DISPLAY7, DISPLAY8, DISPLAY9}; 
+
+int main()
+{
+  //i2c_init();       //I2C initialise
+  //InitUART(MYUBRR);  //USART initialise
+  //sei();
+  
+  while(1)
+  {
+    //USART_Transmit(0x62); 
+    //----- I2C BELOW-----
+    /*i2c_start_wait((I2C_ADDR<<1) + 0); //i2c_start_wait((address<<1) + Write(0)/Read(1)
+    i2c_write(0x65);
+  	i2c_stop();*/ 
+    
+  }
+}
